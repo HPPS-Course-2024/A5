@@ -1,0 +1,10 @@
+*.o
+nbody
+nbody-bh
+particles2text
+warnings2text
+genparticles
+cmpparticles
+frames
+video.mp4
+particles
