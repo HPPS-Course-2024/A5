@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NUM_OCTANTS 8
 
@@ -291,7 +292,7 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
     // accelerations and update velocities, then update positions.
     // Also update the warning list along the way.
     double max_coord = -DBL_MAX, min_coord = DBL_MAX;
-
+#pragma omp parallel for reduction(max : max_coord) reduction(min : min_coord)
     for (int i = 0; i < n; i++) {
       double px = ps[i].pos.x;
       double py = ps[i].pos.y;
@@ -313,10 +314,17 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
         max_coord = ps[i].pos.z;
     }
     struct bh_node* root = bh_new(min_coord, max_coord);
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
+#pragma omp critical
       bh_insert(root, ps, i);
     }
 
+#pragma omp parallel for schedule(dynamic)
+    // SCHIMMELL: Since each thread operates on a distinct particle, you can
+    // safely remove the #pragma omp critical directives for velocity and
+    // position updates. This allows all three components (x, y, z) of velocity
+    // and position to be updated in parallel without any risk of data races.
     for (int i = 0; i < n; i++) {
       struct vec3 a = {0, 0, 0};
       bh_accel(theta, root, ps, i, &a);
@@ -324,26 +332,59 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
       ps[i].vel.y += a.y;
       ps[i].vel.z += a.z;
     }
+#pragma omp parallel for schedule(dynamic)
+    // Same as above, you can remove the #pragma omp critical directive for the
+    // position update. As each thread operates on a distinct particle.
     for (int i = 0; i < n; i++) {
       ps[i].pos.x += ps[i].vel.x;
       ps[i].pos.y += ps[i].vel.y;
       ps[i].pos.z += ps[i].vel.z;
     }
 
-    for (int i = 0; i < n; i++) {
-      double distance = dist_centre(ps[i].pos);
-      if (distance < WARNING_DISTANCE) {
+#pragma omp parallel
+    {
+      int             local_cap = 1;
+      struct warning* local_warnings =
+          malloc(local_cap * sizeof(struct warning));
+      if (!local_warnings) {
+        fprintf(stderr, "malloc failed\n");
+        exit(EXIT_FAILURE);
+      }
+      int local_count = 0;
+
+#pragma omp for schedule(dynamic)
+      for (int i = 0; i < n; i++) {
+        double distance = dist_centre(ps[i].pos);
+        if (distance >= WARNING_DISTANCE) {
+          continue;
+        }
+        if (local_count >= local_cap) {
+          local_cap *= 2;
+          local_warnings =
+              realloc(local_warnings, local_cap * sizeof(struct warning));
+          if (!local_warnings) {
+            fprintf(stderr, "realloc failed\n");
+            exit(EXIT_FAILURE);
+          }
+        }
         printf("<WARNING> Particle %d is too close to the centre!\n", i);
-        if (*tc >= 0) {
-          *tc += 1;
+        local_warnings[local_count++] = (struct warning){s, i};
+      }
+#pragma omp critical
+      {
+        if (local_count > 0) {
+          int old_tc = *tc;
+          *tc += local_count;
           *ts = realloc(*ts, (*tc) * sizeof(struct warning));
           if (!*ts) {
             fprintf(stderr, "realloc failed\n");
-            exit(1);
+            exit(EXIT_FAILURE);
           }
-          (*ts)[*tc - 1] = (struct warning){s, i};
+          memcpy((*ts) + old_tc, local_warnings,
+                 local_count * sizeof(struct warning));
         }
       }
+      free(local_warnings);
     }
   }
 }

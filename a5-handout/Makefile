@@ -2,7 +2,7 @@ CC?=cc
 CFLAGS?=-Wall -Wextra -pedantic -lm -fopenmp -O3
 DEBUG?=-g
 OPENMP?=-fopenmp
-PROGRAMS= genparticles particles2text warnings2text cmpparticles nbody nbody-mt nbody-bh 
+PROGRAMS= genparticles particles2text warnings2text cmpparticles nbody nbody-mt nbody-bh nbody-bh-mt
 
 all: $(PROGRAMS)
 
