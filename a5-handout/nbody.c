@@ -14,7 +14,7 @@ static const double WARNING_DISTANCE = 0.01;
 // *ts must point to an array of warnings with at least *tc elements.
 void nbody(int n, struct particle* ps, int steps, int* tc,
            struct warning** ts) {
-  int warning_capacity = 1; // Start with capacity 1
+  int warning_capacity = 1;
   *ts                  = malloc(warning_capacity * sizeof(struct warning));
   if (!*ts) {
     fprintf(stderr, "malloc failed\n");
@@ -47,6 +47,7 @@ void nbody(int n, struct particle* ps, int steps, int* tc,
     for (int i = 0; i < n; i++) {
       double distance = dist_centre(ps[i].pos);
       if (distance < WARNING_DISTANCE) {
+        printf("Warning: particle %d is too close to the centre!\n", i);
         if (*tc >= warning_capacity) {
           warning_capacity *= 2;
           *ts = realloc(*ts, warning_capacity * sizeof(struct warning));
@@ -82,7 +83,7 @@ int main(int argc, char** argv) {
   double bef = seconds();
   nbody(n, ps, steps, &tc, &ts);
   double aft = seconds();
-  printf("%fpenis\n", aft - bef);
+  printf("%f\n", aft - bef);
   write_particles(argv[2], n, ps);
   write_warnings(argv[3], tc, ts);
 
