@@ -256,7 +256,6 @@ static const double WARNING_DISTANCE = 0.01;
 void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
            double theta) {
   for (int s = 0; s < steps; s++) {
-<<<<<<< HEAD
     // For each iteration, construct the octree (first you must
     // determine the minimum and maximum coordinates), then compute
     // accelerations and update velocities, then update positions.
@@ -266,18 +265,11 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
 
 #pragma omp parallel for reduction(max : max_x, max_y, max_z)                  \
     reduction(min : min_x, min_y, min_z)
-=======
-    double max_coord = -DBL_MAX;
-    double min_coord = DBL_MAX;
-
-#pragma omp parallel for reduction(max : max_coord) reduction(min : min_coord)
->>>>>>> origin/master
     for (int i = 0; i < n; i++) {
       double px = ps[i].pos.x;
       double py = ps[i].pos.y;
       double pz = ps[i].pos.z;
 
-<<<<<<< HEAD
       if (px < min_x)
         min_x = ps[i].pos.x;
       if (px > max_x)
@@ -297,25 +289,6 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
     double          max_coord = fmax(fmax(max_x, max_y), max_z);
     double          min_coord = fmin(fmin(min_x, min_y), min_z);
     struct bh_node* root      = bh_new(min_coord, max_coord);
-=======
-      if (px < min_coord)
-        min_coord = px;
-      if (px > max_coord)
-        max_coord = px;
-
-      if (py < min_coord)
-        min_coord = py;
-      if (py > max_coord)
-        max_coord = py;
-
-      if (pz < min_coord)
-        min_coord = pz;
-      if (pz > max_coord)
-        max_coord = pz;
-    }
-
-    struct bh_node* root = bh_new(min_coord, max_coord);
->>>>>>> origin/master
 
 #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
@@ -341,25 +314,13 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
 
 #pragma omp parallel
     {
-<<<<<<< HEAD
       struct warning* local_warnings = NULL;
       int             local_cap      = 0;
       int             local_count    = 0;
-=======
-      int             local_cap   = 1;
-      int             local_count = 0;
-      struct warning* local_warnings =
-          malloc(local_cap * sizeof(struct warning));
-      if (!local_warnings) {
-        fprintf(stderr, "malloc failed\n");
-        exit(EXIT_FAILURE);
-      }
->>>>>>> origin/master
 
 #pragma omp for schedule(dynamic)
       for (int i = 0; i < n; i++) {
         double distance = dist_centre(ps[i].pos);
-<<<<<<< HEAD
         if (distance >= WARNING_DISTANCE) {
           continue;
         }
@@ -370,17 +331,6 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
           if (!local_warnings) {
             fprintf(stderr, "realloc failed\n");
             exit(EXIT_FAILURE);
-=======
-        if (distance < WARNING_DISTANCE) {
-          if (local_count >= local_cap) {
-            local_cap *= 2;
-            local_warnings =
-                realloc(local_warnings, local_cap * sizeof(struct warning));
-            if (!local_warnings) {
-              fprintf(stderr, "realloc failed\n");
-              exit(EXIT_FAILURE);
-            }
->>>>>>> origin/master
           }
           printf("<WARNING> Particle %d is too close to the centre!\n", i);
           local_warnings[local_count++] = (struct warning){s, i};
