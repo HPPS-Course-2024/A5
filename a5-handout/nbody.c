@@ -24,7 +24,7 @@ void nbody(int n, struct particle* ps, int steps, int* tc,
   // until step s has finished. So the outer loop is usually left sequential,
   // and you parallelize the inner particle loops for forces, positions, etc.
   for (int s = 0; s < steps; s++) {
-// 1) Parallel loop for forces
+    
 #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
       double fx = 0, fy = 0, fz = 0;
@@ -42,7 +42,6 @@ void nbody(int n, struct particle* ps, int steps, int* tc,
       ps[i].vel.z += fz;
     }
 
-// 2) Parallel loop for positions
 #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
       ps[i].pos.x += ps[i].vel.x;
@@ -50,7 +49,6 @@ void nbody(int n, struct particle* ps, int steps, int* tc,
       ps[i].pos.z += ps[i].vel.z;
     }
 
-// 3) Collect warnings privately per thread, then merge
 #pragma omp parallel
     {
       struct warning* local_warnings = NULL;
