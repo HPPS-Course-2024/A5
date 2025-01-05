@@ -285,10 +285,6 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
            double theta) {
 
   for (int s = 0; s < steps; s++) {
-    // For each iteration, construct the octree (first you must
-    // determine the minimum and maximum coordinates), then compute
-    // accelerations and update velocities, then update positions.
-    // Also update the warning list along the way.
     double max_coord = -DBL_MAX, min_coord = DBL_MAX;
 
     for (int i = 0; i < n; i++) {
@@ -297,20 +293,21 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
       double pz = ps[i].pos.z;
 
       if (px < min_coord)
-        min_coord = ps[i].pos.x;
+        min_coord = px;
       if (px > max_coord)
-        max_coord = ps[i].pos.x;
+        max_coord = px;
 
       if (py < min_coord)
-        min_coord = ps[i].pos.y;
+        min_coord = py;
       if (py > max_coord)
-        max_coord = ps[i].pos.y;
+        max_coord = py;
 
       if (pz < min_coord)
-        min_coord = ps[i].pos.z;
+        min_coord = pz;
       if (pz > max_coord)
-        max_coord = ps[i].pos.z;
+        max_coord = pz;
     }
+
     struct bh_node* root = bh_new(min_coord, max_coord);
 
     for (int i = 0; i < n; i++) {
@@ -324,6 +321,7 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
       ps[i].vel.y += a.y;
       ps[i].vel.z += a.z;
     }
+
     for (int i = 0; i < n; i++) {
       ps[i].pos.x += ps[i].vel.x;
       ps[i].pos.y += ps[i].vel.y;
@@ -345,6 +343,8 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
         }
       }
     }
+
+    bh_free(root);
   }
 }
 
