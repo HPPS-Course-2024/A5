@@ -4,4 +4,4 @@
 
 export OMP_NUM_THREADS=${1}
 echo "Running on ${2} with ${OMP_NUM_THREADS} threads to ${3} and ${4}"
-time ./nbody-bash ${2} ${3} ${4}
+time ./nbody-bh ${2} ${3} ${4}

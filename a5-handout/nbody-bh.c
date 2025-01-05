@@ -2,16 +2,14 @@
 #include <assert.h>
 #include <float.h>
 #include <math.h>
+#include <omp.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NUM_OCTANTS 8
 
-// Figure out which child octant a particle belongs to. Returns a
-// number from 0 to 7, inclusive.
-//
-// 'l' is the edge length of space.
 int octant(struct vec3 corner, double l, const struct particle* p) {
   if (p->pos.x >= corner.x + l / 2) {
     if (p->pos.y >= corner.y + l / 2) {
@@ -44,8 +42,6 @@ int octant(struct vec3 corner, double l, const struct particle* p) {
   }
 }
 
-// Given the index of a child octant (0-7), place in *ox/*oy/*oz the
-// normalized corner coordinate.
 void octant_offset(int j, double* ox, double* oy, double* oz) {
   switch (j) {
     case 0:
@@ -91,7 +87,6 @@ void octant_offset(int j, double* ox, double* oy, double* oz) {
   }
 }
 
-// You do not need to modify this definition.
 struct bh_node {
   bool internal; // False when external.
 
@@ -108,33 +103,19 @@ struct bh_node {
   struct bh_node* children[8];
 };
 
-/**
- * Set the fields of a vec3 structure.
- *
- * @param v Pointer to the vec3 structure.
- * @param x X-coordinate value.
- * @param y Y-coordinate value.
- * @param z Z-coordinate value.
- */
 void set_vec3_fields(struct vec3* v, double x, double y, double z) {
   v->x = x;
   v->y = y;
   v->z = z;
 }
 
-/**
- * Update the center of mass for an internal node.
- *
- * @param bh Pointer to the internal bh_node structure.
- */
 void update_center_of_mass(struct bh_node* bh) {
   assert(bh->internal);
-  struct bh_node** children   = bh->children;
-  double           total_mass = 0;
-  struct vec3      com        = {0, 0, 0};
+  double      total_mass = 0.0;
+  struct vec3 com        = {0, 0, 0};
 
   for (int i = 0; i < NUM_OCTANTS; i++) {
-    struct bh_node* child = children[i];
+    struct bh_node* child = bh->children[i];
     if (!child) {
       fprintf(stderr, "Child is NULL\n");
       continue;
@@ -146,7 +127,8 @@ void update_center_of_mass(struct bh_node* bh) {
     com.z += child->com.z * child_mass;
   }
   bh->mass = total_mass;
-  if (total_mass > 0) {
+
+  if (total_mass > 0.0) {
     com.x /= total_mass;
     com.y /= total_mass;
     com.z /= total_mass;
@@ -154,12 +136,8 @@ void update_center_of_mass(struct bh_node* bh) {
   }
 }
 
-// Turn an external node into an internal node containing no
-// particles, and with 8 external node children.
-// We must set necessary fields and then allocate (and properly
-// initialise) our children.
 void bh_mk_internal(struct bh_node* bh) {
-  // Must not already be external.
+  // Must not already be internal.
   assert(!bh->internal);
 
   bh->particle = -1;
@@ -191,42 +169,31 @@ void bh_mk_internal(struct bh_node* bh) {
   }
 }
 
-// Insert particle 'p' (which must be a valid index in 'ps') into our octree.
 void bh_insert(struct bh_node* bh, struct particle* ps, int p) {
   if (bh->internal) {
-    // child <- child of node that p belongs in
     int oct = octant(bh->corner, bh->l, ps + p);
     bh_insert(bh->children[oct], ps, p);
     update_center_of_mass(bh);
   } else {
-    // This is an external node.
     if (bh->particle == -1) {
-      // This is an external node currently with no particle, so we
-      // can just insert the new particle.
       bh->particle = p;
       bh->mass     = ps[p].mass;
       bh->com      = ps[p].pos;
-
     } else {
-      // This is an external node that already has a particle. We must
-      // convert it into an internal node with initially zero mass,
-      // and then insert both the new particle *and* the one it
-      // previously contained, using recursive calls to bh_insert.
       int old_p_idx = bh->particle;
-
       bh_mk_internal(bh);
 
       int oct_old = octant(bh->corner, bh->l, ps + old_p_idx);
-      int oct_new = octant(bh->corner, bh->l, ps + p);
-
       bh_insert(bh->children[oct_old], ps, old_p_idx);
+
+      int oct_new = octant(bh->corner, bh->l, ps + p);
       bh_insert(bh->children[oct_new], ps, p);
+
       update_center_of_mass(bh);
     }
   }
 }
 
-// Free all memory used for the tree.
 void bh_free(struct bh_node* bh) {
   if (bh->internal) {
     for (int i = 0; i < NUM_OCTANTS; i++) {
@@ -236,12 +203,14 @@ void bh_free(struct bh_node* bh) {
   free(bh);
 }
 
-// Compute the accel acting on particle 'p'.  Increments *a.
 void bh_accel(double theta, struct bh_node* node, struct particle* ps, int p,
               struct vec3* a) {
+  if (!node)
+    return; // Safety check, though node should never be NULL if used correctly.
+
   if (node->internal) {
     double d = dist(node->com, (ps + p)->pos);
-    if (node->l / d < theta) {
+    if (d > 0.0 && node->l / d < theta) {
       struct vec3 f = force((ps + p)->pos, node->com, node->mass);
       a->x += f.x;
       a->y += f.y;
@@ -260,31 +229,37 @@ void bh_accel(double theta, struct bh_node* node, struct particle* ps, int p,
   }
 }
 
-// Create a new octree that spans a space with the provided minimum
-// and maximum coordinates.
 struct bh_node* bh_new(double min_coord, double max_coord) {
   struct bh_node* bh = malloc(sizeof(struct bh_node));
-  bh->corner.x       = min_coord;
-  bh->corner.y       = min_coord;
-  bh->corner.z       = min_coord;
-  bh->l              = max_coord - min_coord;
-  bh->internal       = false;
-  bh->particle       = -1;
-  bh->mass           = 0;
+  if (!bh) {
+    fprintf(stderr, "malloc failed in bh_new()\n");
+    exit(EXIT_FAILURE);
+  }
+  bh->corner.x = min_coord;
+  bh->corner.y = min_coord;
+  bh->corner.z = min_coord;
+  bh->l        = max_coord - min_coord;
+  bh->internal = false;
+  bh->particle = -1;
+  bh->mass     = 0.0;
   set_vec3_fields(&bh->com, 0, 0, 0);
+
+  // Initialize children pointers to NULL to avoid any uninitialized usage
+  for (int i = 0; i < NUM_OCTANTS; i++) {
+    bh->children[i] = NULL;
+  }
   return bh;
 }
 
 static const double WARNING_DISTANCE = 0.01;
 
-// Barnes-Hut N-body simulation.
-//
-// *tc must be set to the number of warnings.
-// *ts must point to an array of warnings with at least *tc elements.
 void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
            double theta) {
-
   for (int s = 0; s < steps; s++) {
+    // For each iteration, construct the octree (first you must
+    // determine the minimum and maximum coordinates), then compute
+    // accelerations and update velocities, then update positions.
+    // Also update the warning list along the way.
     double max_coord = -DBL_MAX, min_coord = DBL_MAX;
 
     for (int i = 0; i < n; i++) {
@@ -310,10 +285,13 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
 
     struct bh_node* root = bh_new(min_coord, max_coord);
 
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
-      bh_insert(root, ps, i);
+#pragma omp critical
+      { bh_insert(root, ps, i); }
     }
 
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
       struct vec3 a = {0, 0, 0};
       bh_accel(theta, root, ps, i, &a);
@@ -322,28 +300,54 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
       ps[i].vel.z += a.z;
     }
 
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
       ps[i].pos.x += ps[i].vel.x;
       ps[i].pos.y += ps[i].vel.y;
       ps[i].pos.z += ps[i].vel.z;
     }
 
-    for (int i = 0; i < n; i++) {
-      double distance = dist_centre(ps[i].pos);
-      if (distance < WARNING_DISTANCE) {
-        printf("<WARNING> Particle %d is too close to the centre!\n", i);
-        if (*tc >= 0) {
-          *tc += 1;
+#pragma omp parallel
+    {
+      struct warning* local_warnings = NULL;
+      int             local_cap      = 0;
+      int             local_count    = 0;
+
+#pragma omp for schedule(dynamic)
+      for (int i = 0; i < n; i++) {
+        double distance = dist_centre(ps[i].pos);
+        if (distance >= WARNING_DISTANCE) {
+          continue;
+        }
+        if (local_count >= local_cap) {
+          local_cap = (local_cap == 0) ? 16 : local_cap * 2;
+          local_warnings =
+              realloc(local_warnings, local_cap * sizeof(struct warning));
+          if (!local_warnings) {
+            fprintf(stderr, "realloc failed\n");
+            exit(EXIT_FAILURE);
+          }
+          printf("<WARNING> Particle %d is too close to the centre!\n", i);
+          local_warnings[local_count++] = (struct warning){s, i};
+        }
+      }
+
+#pragma omp critical
+      {
+        if (local_count > 0) {
+          int old_tc = *tc;
+          *tc += local_count;
           *ts = realloc(*ts, (*tc) * sizeof(struct warning));
           if (!*ts) {
             fprintf(stderr, "realloc failed\n");
-            exit(1);
+            exit(EXIT_FAILURE);
           }
-          (*ts)[*tc - 1] = (struct warning){s, i};
+          memcpy((*ts) + old_tc, local_warnings,
+                 local_count * sizeof(struct warning));
         }
       }
+      free(local_warnings);
     }
-
     bh_free(root);
   }
 }
@@ -353,7 +357,8 @@ int main(int argc, char** argv) {
   double theta = 0.5;
   if (argc < 4) {
     printf("Usage: \n");
-    printf("%s <input> <particle output> <warnings output> [steps]\n", argv[0]);
+    printf("%s <input> <particle output> <warnings output> [steps] [theta]\n",
+           argv[0]);
     return 1;
   }
   if (argc > 4) {
@@ -373,9 +378,12 @@ int main(int argc, char** argv) {
   nbody(n, ps, steps, &tc, &ts, theta);
   double aft = seconds();
   printf("%f\n", aft - bef);
+
   write_particles(argv[2], n, ps);
   write_warnings(argv[3], tc, ts);
 
   free(ts);
   free(ps);
+
+  return 0;
 }
