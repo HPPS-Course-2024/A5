@@ -291,29 +291,36 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
     // determine the minimum and maximum coordinates), then compute
     // accelerations and update velocities, then update positions.
     // Also update the warning list along the way.
-    double max_coord = -DBL_MAX, min_coord = DBL_MAX;
-#pragma omp parallel for reduction(max : max_coord) reduction(min : min_coord)
+    double max_x = -DBL_MAX, max_y = -DBL_MAX, max_z = -DBL_MAX;
+    double min_x = DBL_MAX, min_y = DBL_MAX, min_z = DBL_MAX;
+
+#pragma omp parallel for reduction(max : max_x, max_y, max_z)                  \
+    reduction(min : min_x, min_y, min_z)
     for (int i = 0; i < n; i++) {
       double px = ps[i].pos.x;
       double py = ps[i].pos.y;
       double pz = ps[i].pos.z;
 
-      if (px < min_coord)
-        min_coord = ps[i].pos.x;
-      if (px > max_coord)
-        max_coord = ps[i].pos.x;
+      if (px < min_x)
+        min_x = ps[i].pos.x;
+      if (px > max_x)
+        max_x = ps[i].pos.x;
 
-      if (py < min_coord)
-        min_coord = ps[i].pos.y;
-      if (py > max_coord)
-        max_coord = ps[i].pos.y;
+      if (py < min_y)
+        min_y = ps[i].pos.y;
+      if (py > max_y)
+        max_y = ps[i].pos.y;
 
-      if (pz < min_coord)
-        min_coord = ps[i].pos.z;
-      if (pz > max_coord)
-        max_coord = ps[i].pos.z;
+      if (pz < min_z)
+        min_z = ps[i].pos.z;
+      if (pz > max_z)
+        max_z = ps[i].pos.z;
     }
-    struct bh_node* root = bh_new(min_coord, max_coord);
+
+    double          max_coord = fmax(fmax(max_x, max_y), max_z);
+    double          min_coord = fmin(fmin(min_x, min_y), min_z);
+    struct bh_node* root      = bh_new(min_coord, max_coord);
+
 #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < n; i++) {
 #pragma omp critical
@@ -343,14 +350,9 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
 
 #pragma omp parallel
     {
-      int             local_cap = 1;
-      struct warning* local_warnings =
-          malloc(local_cap * sizeof(struct warning));
-      if (!local_warnings) {
-        fprintf(stderr, "malloc failed\n");
-        exit(EXIT_FAILURE);
-      }
-      int local_count = 0;
+      struct warning* local_warnings = NULL;
+      int             local_cap      = 0;
+      int             local_count    = 0;
 
 #pragma omp for schedule(dynamic)
       for (int i = 0; i < n; i++) {
@@ -359,7 +361,7 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
           continue;
         }
         if (local_count >= local_cap) {
-          local_cap *= 2;
+          local_cap = (local_cap == 0) ? 16 : local_cap * 2;
           local_warnings =
               realloc(local_warnings, local_cap * sizeof(struct warning));
           if (!local_warnings) {

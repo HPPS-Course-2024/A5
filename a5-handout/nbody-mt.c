@@ -53,19 +53,17 @@ void nbody(int n, struct particle* ps, int steps, int* tc,
 // 3) Collect warnings privately per thread, then merge
 #pragma omp parallel
     {
-      // Use a local dynamic array (or something similar) in each thread
       struct warning* local_warnings = NULL;
       int             local_cap      = 0;
       int             local_count    = 0;
 
-// Each thread loops over all particles (can use #pragma omp for again)
 #pragma omp for schedule(dynamic)
       for (int i = 0; i < n; i++) {
         double distance = dist_centre(ps[i].pos);
         if (distance < WARNING_DISTANCE) {
           printf("<WARNING> Particle %d is too close to the centre!\n", i);
           if (local_count >= local_cap) {
-            local_cap = (local_cap == 0) ? 1 : local_cap * 2;
+            local_cap = (local_cap == 0) ? 16 : local_cap * 2;
             local_warnings =
                 realloc(local_warnings, local_cap * sizeof(struct warning));
             if (!local_warnings) {

@@ -7,8 +7,8 @@
 <WARNING> Particle 2616 is too close to the centre!
 <WARNING> Particle 2903 is too close to the centre!
 <WARNING> Particle 2995 is too close to the centre!
-<WARNING> Particle 3045 is too close to the centre!
 <WARNING> Particle 3019 is too close to the centre!
+<WARNING> Particle 3045 is too close to the centre!
 <WARNING> Particle 3273 is too close to the centre!
 <WARNING> Particle 3367 is too close to the centre!
 <WARNING> Particle 4687 is too close to the centre!
@@ -28,7 +28,11 @@
 <WARNING> Particle 7860 is too close to the centre!
 <WARNING> Particle 8466 is too close to the centre!
 <WARNING> Particle 51 is too close to the centre!
+<WARNING> Particle 61 is too close to the centre!
 <WARNING> Particle 78 is too close to the centre!
+<WARNING> Particle 100 is too close to the centre!
+<WARNING> Particle 139 is too close to the centre!
+<WARNING> Particle 219 is too close to the centre!
 <WARNING> Particle 226 is too close to the centre!
 <WARNING> Particle 359 is too close to the centre!
 <WARNING> Particle 370 is too close to the centre!
@@ -46,9 +50,10 @@
 <WARNING> Particle 1131 is too close to the centre!
 <WARNING> Particle 1133 is too close to the centre!
 <WARNING> Particle 1202 is too close to the centre!
+<WARNING> Particle 1252 is too close to the centre!
 <WARNING> Particle 1323 is too close to the centre!
-<WARNING> Particle 1394 is too close to the centre!
 <WARNING> Particle 1381 is too close to the centre!
+<WARNING> Particle 1394 is too close to the centre!
 <WARNING> Particle 1433 is too close to the centre!
 <WARNING> Particle 1471 is too close to the centre!
 <WARNING> Particle 1480 is too close to the centre!
@@ -74,10 +79,16 @@
 <WARNING> Particle 2662 is too close to the centre!
 <WARNING> Particle 2743 is too close to the centre!
 <WARNING> Particle 2904 is too close to the centre!
-<WARNING> Particle 2980 is too close to the centre!
 <WARNING> Particle 2975 is too close to the centre!
+<WARNING> Particle 2980 is too close to the centre!
 <WARNING> Particle 3004 is too close to the centre!
 <WARNING> Particle 3069 is too close to the centre!
+<WARNING> Particle 3126 is too close to the centre!
+<WARNING> Particle 3152 is too close to the centre!
+<WARNING> Particle 3181 is too close to the centre!
+<WARNING> Particle 3221 is too close to the centre!
+<WARNING> Particle 3225 is too close to the centre!
+<WARNING> Particle 3274 is too close to the centre!
 <WARNING> Particle 3321 is too close to the centre!
 <WARNING> Particle 3449 is too close to the centre!
 <WARNING> Particle 3451 is too close to the centre!
@@ -113,7 +124,6 @@
 <WARNING> Particle 4820 is too close to the centre!
 <WARNING> Particle 4836 is too close to the centre!
 <WARNING> Particle 4838 is too close to the centre!
-<WARNING> Particle 3126 is too close to the centre!
 <WARNING> Particle 5020 is too close to the centre!
 <WARNING> Particle 5073 is too close to the centre!
 <WARNING> Particle 5151 is too close to the centre!
@@ -156,6 +166,7 @@
 <WARNING> Particle 6836 is too close to the centre!
 <WARNING> Particle 6893 is too close to the centre!
 <WARNING> Particle 6931 is too close to the centre!
+<WARNING> Particle 7008 is too close to the centre!
 <WARNING> Particle 7019 is too close to the centre!
 <WARNING> Particle 7029 is too close to the centre!
 <WARNING> Particle 7042 is too close to the centre!
@@ -211,23 +222,12 @@
 <WARNING> Particle 9609 is too close to the centre!
 <WARNING> Particle 9620 is too close to the centre!
 <WARNING> Particle 9642 is too close to the centre!
-<WARNING> Particle 139 is too close to the centre!
 <WARNING> Particle 9759 is too close to the centre!
 <WARNING> Particle 9836 is too close to the centre!
 <WARNING> Particle 9920 is too close to the centre!
 <WARNING> Particle 9949 is too close to the centre!
 <WARNING> Particle 9953 is too close to the centre!
 <WARNING> Particle 9963 is too close to the centre!
-<WARNING> Particle 219 is too close to the centre!
-<WARNING> Particle 3225 is too close to the centre!
-<WARNING> Particle 1252 is too close to the centre!
-<WARNING> Particle 100 is too close to the centre!
-<WARNING> Particle 61 is too close to the centre!
-<WARNING> Particle 3274 is too close to the centre!
-<WARNING> Particle 7008 is too close to the centre!
-<WARNING> Particle 3152 is too close to the centre!
-<WARNING> Particle 3221 is too close to the centre!
-<WARNING> Particle 3181 is too close to the centre!
 <WARNING> Particle 206 is too close to the centre!
 <WARNING> Particle 461 is too close to the centre!
 <WARNING> Particle 666 is too close to the centre!
@@ -235,6 +235,17 @@
 <WARNING> Particle 1021 is too close to the centre!
 <WARNING> Particle 1238 is too close to the centre!
 <WARNING> Particle 1260 is too close to the centre!
+<WARNING> Particle 1271 is too close to the centre!
+<WARNING> Particle 1793 is too close to the centre!
+<WARNING> Particle 1876 is too close to the centre!
+<WARNING> Particle 1899 is too close to the centre!
+<WARNING> Particle 1904 is too close to the centre!
+<WARNING> Particle 2039 is too close to the centre!
+<WARNING> Particle 2141 is too close to the centre!
+<WARNING> Particle 2164 is too close to the centre!
+<WARNING> Particle 2230 is too close to the centre!
+<WARNING> Particle 2272 is too close to the centre!
+<WARNING> Particle 2461 is too close to the centre!
 <WARNING> Particle 2487 is too close to the centre!
 <WARNING> Particle 2490 is too close to the centre!
 <WARNING> Particle 2568 is too close to the centre!
@@ -287,7 +298,6 @@
 <WARNING> Particle 5833 is too close to the centre!
 <WARNING> Particle 5862 is too close to the centre!
 <WARNING> Particle 6018 is too close to the centre!
-<WARNING> Particle 1271 is too close to the centre!
 <WARNING> Particle 6128 is too close to the centre!
 <WARNING> Particle 6295 is too close to the centre!
 <WARNING> Particle 6348 is too close to the centre!
@@ -300,8 +310,8 @@
 <WARNING> Particle 7064 is too close to the centre!
 <WARNING> Particle 7199 is too close to the centre!
 <WARNING> Particle 7257 is too close to the centre!
-<WARNING> Particle 7288 is too close to the centre!
 <WARNING> Particle 7276 is too close to the centre!
+<WARNING> Particle 7288 is too close to the centre!
 <WARNING> Particle 7378 is too close to the centre!
 <WARNING> Particle 7420 is too close to the centre!
 <WARNING> Particle 7537 is too close to the centre!
@@ -314,6 +324,7 @@
 <WARNING> Particle 8377 is too close to the centre!
 <WARNING> Particle 8393 is too close to the centre!
 <WARNING> Particle 8411 is too close to the centre!
+<WARNING> Particle 8445 is too close to the centre!
 <WARNING> Particle 8482 is too close to the centre!
 <WARNING> Particle 8512 is too close to the centre!
 <WARNING> Particle 8647 is too close to the centre!
@@ -331,17 +342,6 @@
 <WARNING> Particle 9852 is too close to the centre!
 <WARNING> Particle 9857 is too close to the centre!
 <WARNING> Particle 9943 is too close to the centre!
-<WARNING> Particle 1876 is too close to the centre!
-<WARNING> Particle 1899 is too close to the centre!
-<WARNING> Particle 1904 is too close to the centre!
-<WARNING> Particle 2039 is too close to the centre!
-<WARNING> Particle 2164 is too close to the centre!
-<WARNING> Particle 2141 is too close to the centre!
-<WARNING> Particle 2230 is too close to the centre!
-<WARNING> Particle 2272 is too close to the centre!
-<WARNING> Particle 2461 is too close to the centre!
-<WARNING> Particle 8445 is too close to the centre!
-<WARNING> Particle 1793 is too close to the centre!
 <WARNING> Particle 945 is too close to the centre!
 <WARNING> Particle 1324 is too close to the centre!
 <WARNING> Particle 1964 is too close to the centre!
@@ -356,11 +356,11 @@
 <WARNING> Particle 5633 is too close to the centre!
 <WARNING> Particle 6995 is too close to the centre!
 <WARNING> Particle 7141 is too close to the centre!
+<WARNING> Particle 7949 is too close to the centre!
 <WARNING> Particle 8318 is too close to the centre!
 <WARNING> Particle 8698 is too close to the centre!
 <WARNING> Particle 8797 is too close to the centre!
 <WARNING> Particle 9031 is too close to the centre!
-<WARNING> Particle 7949 is too close to the centre!
 <WARNING> Particle 9890 is too close to the centre!
 <WARNING> Particle 2343 is too close to the centre!
 <WARNING> Particle 4394 is too close to the centre!
@@ -370,8 +370,4 @@
 <WARNING> Particle 5949 is too close to the centre!
 <WARNING> Particle 5949 is too close to the centre!
 <WARNING> Particle 5949 is too close to the centre!
-1.393719
-
-real    0m1.503s
-user    0m16.270s
-sys     0m0.369s
+5.835649

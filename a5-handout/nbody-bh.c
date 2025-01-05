@@ -146,7 +146,6 @@ void update_center_of_mass(struct bh_node* bh) {
     com.z += child->com.z * child_mass;
   }
   bh->mass = total_mass;
-
   if (total_mass > 0) {
     com.x /= total_mass;
     com.y /= total_mass;
@@ -193,7 +192,6 @@ void bh_mk_internal(struct bh_node* bh) {
 }
 
 // Insert particle 'p' (which must be a valid index in 'ps') into our octree.
-// This is an ißss.
 void bh_insert(struct bh_node* bh, struct particle* ps, int p) {
   if (bh->internal) {
     // child <- child of node that p belongs in
@@ -208,6 +206,7 @@ void bh_insert(struct bh_node* bh, struct particle* ps, int p) {
       bh->particle = p;
       bh->mass     = ps[p].mass;
       bh->com      = ps[p].pos;
+
     } else {
       // This is an external node that already has a particle. We must
       // convert it into an internal node with initially zero mass,
@@ -217,14 +216,11 @@ void bh_insert(struct bh_node* bh, struct particle* ps, int p) {
 
       bh_mk_internal(bh);
 
-      // Insert the old particle.
       int oct_old = octant(bh->corner, bh->l, ps + old_p_idx);
-      bh_insert(bh->children[oct_old], ps, old_p_idx);
-
-      // Insert the new particle.
       int oct_new = octant(bh->corner, bh->l, ps + p);
-      bh_insert(bh->children[oct_new], ps, p);
 
+      bh_insert(bh->children[oct_old], ps, old_p_idx);
+      bh_insert(bh->children[oct_new], ps, p);
       update_center_of_mass(bh);
     }
   }
@@ -274,6 +270,8 @@ struct bh_node* bh_new(double min_coord, double max_coord) {
   bh->l              = max_coord - min_coord;
   bh->internal       = false;
   bh->particle       = -1;
+  bh->mass           = 0;
+  set_vec3_fields(&bh->com, 0, 0, 0);
   return bh;
 }
 
@@ -285,6 +283,7 @@ static const double WARNING_DISTANCE = 0.01;
 // *ts must point to an array of warnings with at least *tc elements.
 void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
            double theta) {
+
   for (int s = 0; s < steps; s++) {
     // For each iteration, construct the octree (first you must
     // determine the minimum and maximum coordinates), then compute
@@ -313,6 +312,7 @@ void nbody(int n, struct particle* ps, int steps, int* tc, struct warning** ts,
         max_coord = ps[i].pos.z;
     }
     struct bh_node* root = bh_new(min_coord, max_coord);
+
     for (int i = 0; i < n; i++) {
       bh_insert(root, ps, i);
     }
